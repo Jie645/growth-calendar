@@ -1,0 +1,230 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102a43">
+  <meta name="description" content="以日历为核心界面的轻量化个人成长记录工具">
+  <title>成长日历 · 每天一分钟，留下成长痕迹</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-calendar" viewBox="0 0 24 24"><path d="M7 2v3M17 2v3M3.5 9.5h17M5.5 4.5h13a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z"/></symbol>
+    <symbol id="i-timeline" viewBox="0 0 24 24"><path d="M6 4v16M6 7h8a4 4 0 0 1 0 8H9M6 17h11"/><circle cx="6" cy="5" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4ZM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8ZM5 14l.7 2.3L8 17l-2.3.7L5 20l-.7-2.3L2 17l2.3-.7Z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M13 22c4.5-.8 7-4.2 7-8.5 0-3.6-2-6.7-5.5-9.5.2 3.3-1.4 5-3.2 5.9.3-2.6-.7-4.6-2.7-6.4C9 6.2 9 8.1 7.7 10.2 6.4 12.3 5 14 5 16.7 5 19.8 7.7 22 11 22h2Z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 7h3l1.5-2h7L17 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand" data-view="calendar" aria-label="返回日历">
+        <span class="brand-mark"><svg><use href="#i-calendar"></use></svg></span>
+        <span class="brand-copy"><strong>成长日历</strong><small>GROWTH CALENDAR</small></span>
+      </button>
+
+      <nav class="main-nav" aria-label="主导航">
+        <button class="nav-item active" data-view="calendar"><svg><use href="#i-calendar"></use></svg><span>日历</span></button>
+        <button class="nav-item" data-view="timeline"><svg><use href="#i-timeline"></use></svg><span>时间线</span></button>
+        <button class="nav-item" data-view="insights"><svg><use href="#i-chart"></use></svg><span>成长统计</span></button>
+      </nav>
+
+      <div class="top-actions">
+<button id="weatherWidget" class="weather-widget" type="button" title="点击刷新天气">
+          <span id="weatherIcon" class="weather-icon">◌</span>
+          <span class="weather-copy"><strong id="weatherTemp">--°</strong><small id="weatherLocation">定位中…</small></span>
+          <span id="weatherDesc" class="weather-desc">获取天气</span>
+        </button>
+        <span id="demoBadge" class="demo-badge hidden">示例模式</span>
+        <button id="quickAddBtn" class="btn btn-primary btn-compact"><svg><use href="#i-plus"></use></svg><span>记录今天</span></button>
+        <button id="moreBtn" class="icon-btn" aria-label="更多设置"><svg><use href="#i-more"></use></svg></button>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section id="calendarView" class="view active" aria-labelledby="calendarTitle">
+        <div class="hero-row">
+          <div class="hero-copy">
+            <span class="eyebrow">ONE MINUTE A DAY</span>
+            <h1 id="calendarTitle">今天，留下成长的痕迹</h1>
+            <p id="heroSummary">写下一段今天的成长片段，也为未来保留一份可回看的真实线索。</p>
+          </div>
+          <div class="streak-card">
+            <div class="streak-icon"><svg><use href="#i-flame"></use></svg></div>
+            <div><strong id="heroStreak">0</strong><span>天连续记录</span></div>
+            <small id="streakHint">从今天开始</small>
+          </div>
+        </div>
+
+        <div class="metric-strip">
+          <article class="metric-card"><span class="metric-label">累计记录</span><strong id="metricTotal">0</strong><small>天</small></article>
+          <article class="metric-card"><span class="metric-label">本月记录</span><strong id="metricMonth">0</strong><small>天</small></article>
+          <article class="metric-card"><span class="metric-label">最长连续</span><strong id="metricLongest">0</strong><small>天</small></article>
+          <article class="metric-card"><span class="metric-label">图片记忆</span><strong id="metricPhotos">0</strong><small>张</small></article>
+        </div>
+
+        <div class="calendar-layout">
+          <section class="panel calendar-panel">
+            <header class="panel-header calendar-header">
+              <div>
+                <span class="section-kicker">MY GROWTH CALENDAR</span>
+                <h2 id="monthTitle">2026年9月</h2>
+              </div>
+              <div class="calendar-nav">
+                <button id="todayBtn" class="btn btn-quiet btn-compact">今天</button>
+                <button id="prevMonthBtn" class="icon-btn small" aria-label="上个月"><svg><use href="#i-chevron-left"></use></svg></button>
+                <button id="nextMonthBtn" class="icon-btn small" aria-label="下个月"><svg><use href="#i-chevron-right"></use></svg></button>
+              </div>
+            </header>
+            <div class="weekdays" aria-hidden="true">
+              <span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid" aria-label="月历"></div>
+            <footer class="calendar-legend">
+              <span><i class="legend-dot has-record"></i>已记录</span>
+              <span><i class="legend-dot today"></i>今天</span>
+              <span><i class="legend-dot event"></i>节日 / 节气</span>
+              <span><svg><use href="#i-image"></use></svg>含图片</span>
+            </footer>
+          </section>
+
+          <aside class="day-preview">
+            <div class="day-preview-head">
+              <div><span id="previewWeekday" class="section-kicker">星期六</span><h2 id="previewDate">9月19日</h2></div>
+              <button id="previewEditBtn" class="icon-btn small" aria-label="编辑当天记录"><svg><use href="#i-edit"></use></svg></button>
+            </div>
+            <div id="dayPreviewContent" class="day-preview-content"></div>
+            <button id="previewPrimaryBtn" class="btn btn-primary btn-block"><svg><use href="#i-plus"></use></svg><span>记录这一天</span></button>
+            <div class="preview-tip"><svg><use href="#i-sparkles"></use></svg><span>不需要写得完美，真实的片段就很有价值。</span></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="timelineView" class="view" aria-labelledby="timelineTitle">
+        <div class="page-heading">
+          <div><span class="eyebrow">YOUR GROWTH STORY</span><h1 id="timelineTitle">成长时间线</h1><p>所有记录按时间自动归档，回看每一天留下的真实片段。</p></div>
+          <div class="page-heading-actions">
+            <label class="search-box"><svg><use href="#i-search"></use></svg><input id="timelineSearch" type="search" placeholder="搜索记录内容…"></label>
+            <button id="randomReviewBtn" class="btn btn-secondary"><svg><use href="#i-sparkles"></use></svg><span>随机回顾</span></button>
+          </div>
+        </div>
+        <div id="timelineContent" class="timeline-content"></div>
+      </section>
+
+      <section id="insightsView" class="view" aria-labelledby="insightsTitle">
+        <div class="page-heading">
+          <div><span class="eyebrow">SEE YOUR PROGRESS</span><h1 id="insightsTitle">成长统计</h1><p>记录频率、连续天数和内容密度，让坚持变得清晰可见。</p></div>
+        </div>
+        <div class="insight-grid">
+          <article class="insight-card accent-blue"><span>累计记录</span><strong id="insightTotal">0</strong><small>天</small><p>每一次记录，都是给未来留下的线索。</p></article>
+          <article class="insight-card accent-teal"><span>当前连续</span><strong id="insightStreak">0</strong><small>天</small><p>保持节奏，比追求完美更重要。</p></article>
+          <article class="insight-card accent-gold"><span>记录密度</span><strong id="insightDensity">0</strong><small>%</small><p>按本月已过去的日期计算。</p></article>
+          <article class="insight-card accent-purple"><span>内容沉淀</span><strong id="insightWords">0</strong><small>字</small><p>三条记录维度中的有效文字总量。</p></article>
+        </div>
+        <div class="insights-layout">
+          <section class="panel heatmap-panel">
+            <header class="panel-header"><div><span class="section-kicker">LAST 12 WEEKS</span><h2>记录热力图</h2></div><span id="heatmapRange" class="muted"></span></header>
+            <div class="heatmap-wrap"><div class="heatmap-weekdays"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div><div id="heatmap" class="heatmap"></div></div>
+            <div class="heatmap-legend"><span>少</span><i class="heat-0"></i><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i><span>多</span></div>
+          </section>
+          <section class="panel monthly-panel">
+            <header class="panel-header"><div><span class="section-kicker">MONTHLY RHYTHM</span><h2 id="yearTitle">2026 年月度记录</h2></div></header>
+            <div id="monthlyChart" class="monthly-chart"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer"><span>成长日历 · 本地优先的个人成长记录</span><span>数据默认保存在你的浏览器中</span></footer>
+  </div>
+
+  <dialog id="recordDialog" class="dialog record-dialog">
+    <form id="recordForm" method="dialog">
+      <header class="dialog-header">
+        <div><span id="editorWeekday" class="eyebrow">SATURDAY</span><h2 id="editorDate">9月19日</h2><p>花一分钟，记录今天真实的成长片段。</p></div>
+        <button type="button" class="icon-btn" data-close-dialog="recordDialog" aria-label="关闭"><svg><use href="#i-close"></use></svg></button>
+      </header>
+      <div class="dialog-body">
+        <label class="field-group field-group-single">
+          <span class="field-label"><b>01</b><strong>今天留下了什么？</strong><small>行动、学习、感受或下一步都可以</small></span>
+          <textarea id="recordInput" rows="8" maxlength="4000" placeholder="例如：今天完成了第一版原型，也意识到先做小范围测试，比一次性追求完整更重要。"></textarea>
+        </label>
+
+        <section class="image-section">
+          <div class="image-section-head"><div><strong>添加图片</strong><small>用真实画面补充当天记忆</small></div><button id="selectImagesBtn" type="button" class="btn btn-secondary btn-compact"><svg><use href="#i-camera"></use></svg><span>选择图片</span></button></div>
+          <input id="imageInput" type="file" accept="image/*" multiple hidden>
+          <div id="dropZone" class="drop-zone" tabindex="0">
+            <svg><use href="#i-upload"></use></svg>
+            <span>点击选择或拖拽图片到这里</span>
+            <small>图片会在本地压缩保存，单张不超过 10MB</small>
+          </div>
+          <div id="imagePreview" class="image-preview"></div>
+        </section>
+      </div>
+      <footer class="dialog-footer">
+        <button id="deleteRecordBtn" type="button" class="btn btn-danger-quiet hidden"><svg><use href="#i-trash"></use></svg><span>删除记录</span></button>
+        <div class="dialog-footer-right">
+          <button type="button" class="btn btn-quiet" data-close-dialog="recordDialog">取消</button>
+          <button id="saveRecordBtn" class="btn btn-primary" type="submit"><svg><use href="#i-calendar"></use></svg><span>保存记录</span></button>
+        </div>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog id="welcomeDialog" class="dialog welcome-dialog">
+    <div class="welcome-art">
+      <span class="welcome-orbit orbit-one"></span><span class="welcome-orbit orbit-two"></span>
+      <svg><use href="#i-calendar"></use></svg>
+    </div>
+    <div class="welcome-copy">
+      <span class="eyebrow">WELCOME TO GROWTH CALENDAR</span>
+      <h2>每天一分钟，留下成长的痕迹。</h2>
+      <p>点击日历上的任意一天，写下一段今天的成长片段。记录会自动归档到你的个人成长时间线。</p>
+      <div class="welcome-points"><span>低门槛记录</span><span>图文留存</span><span>数据保存在本地</span></div>
+      <div class="welcome-actions"><button id="startTodayBtn" class="btn btn-primary"><svg><use href="#i-plus"></use></svg><span>记录今天</span></button><button id="loadDemoBtn" class="btn btn-secondary">先看看示例</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="moreDialog" class="dialog compact-dialog">
+    <header class="dialog-header"><div><span class="eyebrow">DATA & SETTINGS</span><h2>数据管理</h2><p>你的记录默认只保存在当前浏览器。</p></div><button type="button" class="icon-btn" data-close-dialog="moreDialog" aria-label="关闭"><svg><use href="#i-close"></use></svg></button></header>
+    <div class="dialog-body settings-list">
+      <button id="exportDataBtn" class="setting-row"><span class="setting-icon"><svg><use href="#i-download"></use></svg></span><span><strong>导出数据备份</strong><small>下载 JSON 文件，便于迁移和长期保存</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
+      <button id="importDataBtn" class="setting-row"><span class="setting-icon"><svg><use href="#i-upload"></use></svg></span><span><strong>导入数据</strong><small>从成长日历 JSON 备份恢复记录</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
+      <button id="loadDemoFromMoreBtn" class="setting-row"><span class="setting-icon"><svg><use href="#i-sparkles"></use></svg></span><span><strong>加载示例数据</strong><small>快速体验日历、时间线和统计效果</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
+      <button id="clearDataBtn" class="setting-row danger"><span class="setting-icon"><svg><use href="#i-trash"></use></svg></span><span><strong>清空全部数据</strong><small>此操作不可撤销，请先导出备份</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
+      <input id="importFileInput" type="file" accept="application/json,.json" hidden>
+    </div>
+  </dialog>
+
+  <dialog id="imageDialog" class="dialog image-dialog"><button type="button" class="icon-btn image-dialog-close" data-close-dialog="imageDialog" aria-label="关闭"><svg><use href="#i-close"></use></svg></button><img id="lightboxImage" alt="记录图片"></dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="calendar-events.js?v=5"></script>
+  <script src="store.js?v=5"></script>
+  <script src="ui.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
