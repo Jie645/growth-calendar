@@ -3,7 +3,7 @@
   "short_name": "成长日历",
   "description": "以日历为核心界面的轻量化个人成长记录工具",
   "lang": "zh-CN",
-  "start_url": "./index.html?v=5",
+  "start_url": "./index.html?v=6",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f6f8fb",
@@ -12,4 +12,5 @@
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
+
 

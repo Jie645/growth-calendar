@@ -432,11 +432,12 @@
     const editParam = new URLSearchParams(location.search).get('edit');
     if (editParam) openEditor(editParam === 'today' ? todayKey : editParam);
     if (!state.records.size && !state.demoMode) setTimeout(() => elements.welcomeDialog.showModal(), 180);
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=5').catch(console.warn);
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=6').catch(console.warn);
   }
 
   init().catch(error => { console.error(error); toast('应用初始化失败，请刷新页面重试', 'error'); });
 })();
+
 
 
 
