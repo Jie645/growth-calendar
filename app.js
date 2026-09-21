@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   'use strict';
   const G = window.GrowthCalendar;
   const UI = window.GrowthCalendarUI;
@@ -106,7 +106,7 @@
     } else {
       await Store.put(record);
       state.records.set(date, record);
-      toast('今天的成长痕迹已保存');
+      toast('这一天的成长痕迹已保存');
     }
     closeDialog(elements.recordDialog);
     UI.renderAll();
@@ -370,11 +370,12 @@
     $('#prevMonthBtn').addEventListener('click', () => { state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth() - 1, 1); UI.renderCalendar(); });
     $('#nextMonthBtn').addEventListener('click', () => { state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth() + 1, 1); UI.renderCalendar(); });
     $('#todayBtn').addEventListener('click', () => { state.currentMonth = new Date(G.today.getFullYear(), G.today.getMonth(), 1); UI.selectDate(todayKey); });
-    elements.calendarGrid.addEventListener('click', event => { const cell = event.target.closest('[data-date]'); if (cell) UI.selectDate(cell.dataset.date); });
-    elements.calendarGrid.addEventListener('dblclick', event => { const cell = event.target.closest('[data-date]'); if (cell) openEditor(cell.dataset.date); });
-    elements.previewPrimaryBtn.addEventListener('click', () => openEditor(state.selectedDate));
-    elements.previewEditBtn.addEventListener('click', () => openEditor(state.selectedDate));
-    elements.previewContent.addEventListener('click', event => { const image = event.target.closest('[data-lightbox]'); if (image) openLightbox(image.dataset.lightbox); });
+    elements.calendarGrid.addEventListener('click', event => {
+      const cell = event.target.closest('[data-date]');
+      if (!cell) return;
+      UI.selectDate(cell.dataset.date);
+      openEditor(cell.dataset.date);
+    });
 
     elements.recordForm.addEventListener('submit', saveCurrentRecord);
     elements.deleteRecordBtn.addEventListener('click', () => deleteRecord(state.editorDate));
@@ -432,7 +433,7 @@
     const editParam = new URLSearchParams(location.search).get('edit');
     if (editParam) openEditor(editParam === 'today' ? todayKey : editParam);
     if (!state.records.size && !state.demoMode) setTimeout(() => elements.welcomeDialog.showModal(), 180);
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=6').catch(console.warn);
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=7').catch(console.warn);
   }
 
   init().catch(error => { console.error(error); toast('应用初始化失败，请刷新页面重试', 'error'); });

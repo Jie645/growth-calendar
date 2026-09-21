@@ -1,14 +1,13 @@
 ﻿(() => {
   'use strict';
   const G = window.GrowthCalendar;
-  const { state, today, todayKey, WEEKDAYS, MONTH_NAMES, dateKey, parseDateKey, addDays, daysInMonth, sameMonth, formatLongDate, formatFullDate, escapeHtml, hasText, recordText, recordHasContent, contentLength, calculateStats } = G;
+  const { state, today, todayKey, WEEKDAYS, MONTH_NAMES, dateKey, parseDateKey, addDays, daysInMonth, sameMonth, formatLongDate, formatFullDate, escapeHtml, recordText, recordHasContent, contentLength, calculateStats } = G;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
   const elements = {
     views: $$('.view'), navItems: $$('.nav-item'), calendarGrid: $('#calendarGrid'), monthTitle: $('#monthTitle'),
-    heroSummary: $('#heroSummary'), previewWeekday: $('#previewWeekday'), previewDate: $('#previewDate'),
-    previewContent: $('#dayPreviewContent'), previewPrimaryBtn: $('#previewPrimaryBtn'), previewEditBtn: $('#previewEditBtn'),
+    heroSummary: $('#heroSummary'),
     recordDialog: $('#recordDialog'), recordForm: $('#recordForm'), editorWeekday: $('#editorWeekday'), editorDate: $('#editorDate'),
     recordInput: $('#recordInput'), imageInput: $('#imageInput'),
     imagePreview: $('#imagePreview'), dropZone: $('#dropZone'), deleteRecordBtn: $('#deleteRecordBtn'),
@@ -77,27 +76,6 @@
       fragment.appendChild(button);
     }
     elements.calendarGrid.replaceChildren(fragment);
-    renderPreview();
-  }
-
-  function renderPreview() {
-    const date = parseDateKey(state.selectedDate);
-    const record = state.records.get(state.selectedDate);
-    const eventText = calendarEvent(state.selectedDate).map(item => item.text).join(' · ');
-    elements.previewWeekday.textContent = `${WEEKDAYS[date.getDay()]}${eventText ? ' · ' + eventText : ''}`;
-    elements.previewDate.textContent = formatLongDate(state.selectedDate);
-    if (!recordHasContent(record)) {
-      elements.previewContent.innerHTML = `<div class="preview-empty"><div><div class="preview-empty-icon"><svg><use href="#i-sparkles"></use></svg></div><strong>这一天还没有记录</strong><p>写下一段今天的真实片段，让今天留下可回看的线索。</p></div></div>`;
-      elements.previewPrimaryBtn.querySelector('span').textContent = '记录这一天';
-      elements.previewEditBtn.classList.add('hidden');
-      return;
-    }
-    const text = recordText(record);
-    elements.previewContent.innerHTML = `
-      ${hasText(text) ? `<div class="preview-block"><span>当天记录</span><p>${escapeHtml(text)}</p></div>` : ''}
-      ${record.images?.length ? `<div class="preview-images">${record.images.slice(0,3).map(image => `<img src="${escapeHtml(image.dataUrl)}" alt="${escapeHtml(image.name || '记录图片')}" data-lightbox="${escapeHtml(image.dataUrl)}">`).join('')}</div>` : ''}`;
-    elements.previewPrimaryBtn.querySelector('span').textContent = '编辑当天记录';
-    elements.previewEditBtn.classList.remove('hidden');
   }
 
   function renderTimelineCard(record) {
@@ -215,7 +193,7 @@
   }
 
   window.GrowthCalendarUI = {
-    elements, renderAll, renderCalendar, renderPreview, renderTimeline, renderInsights, showView, selectDate
+    elements, renderAll, renderCalendar, renderTimeline, renderInsights, showView, selectDate
   };
 })();
 

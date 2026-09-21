@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -8,7 +8,7 @@
   <title>成长日历 · 每天一分钟，留下成长痕迹</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
@@ -103,15 +103,6 @@
             </footer>
           </section>
 
-          <aside class="day-preview">
-            <div class="day-preview-head">
-              <div><span id="previewWeekday" class="section-kicker">星期六</span><h2 id="previewDate">9月19日</h2></div>
-              <button id="previewEditBtn" class="icon-btn small" aria-label="编辑当天记录"><svg><use href="#i-edit"></use></svg></button>
-            </div>
-            <div id="dayPreviewContent" class="day-preview-content"></div>
-            <button id="previewPrimaryBtn" class="btn btn-primary btn-block"><svg><use href="#i-plus"></use></svg><span>记录这一天</span></button>
-            <div class="preview-tip"><svg><use href="#i-sparkles"></use></svg><span>自知者不怨人，知命者不怨天。</span></div>
-          </aside>
         </div>
       </section>
 
@@ -156,12 +147,12 @@
   <dialog id="recordDialog" class="dialog record-dialog">
     <form id="recordForm" method="dialog">
       <header class="dialog-header">
-        <div><span id="editorWeekday" class="eyebrow">SATURDAY</span><h2 id="editorDate">9月19日</h2><p>花一分钟，记录今天真实的成长片段。</p></div>
+        <div><span id="editorWeekday" class="eyebrow">SATURDAY</span><h2 id="editorDate">9月19日</h2><p>花一分钟，记录这一天的真实成长片段。</p></div>
         <button type="button" class="icon-btn" data-close-dialog="recordDialog" aria-label="关闭"><svg><use href="#i-close"></use></svg></button>
       </header>
       <div class="dialog-body">
         <label class="field-group field-group-single">
-          <span class="field-label"><b>01</b><strong>今天留下了什么？</strong><small>行动、学习、感受或下一步都可以</small></span>
+          <span class="field-label"><b>01</b><strong>这一天留下了什么？</strong><small>行动、学习、感受或下一步都可以</small></span>
           <textarea id="recordInput" rows="8" maxlength="4000" placeholder="例如：今天完成了第一版原型，也意识到先做小范围测试，比一次性追求完整更重要。"></textarea>
         </label>
 
@@ -214,10 +205,10 @@
   <dialog id="imageDialog" class="dialog image-dialog"><button type="button" class="icon-btn image-dialog-close" data-close-dialog="imageDialog" aria-label="关闭"><svg><use href="#i-close"></use></svg></button><img id="lightboxImage" alt="记录图片"></dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="calendar-events.js?v=6"></script>
-  <script src="store.js?v=6"></script>
-  <script src="ui.js?v=6"></script>
-  <script src="app.js?v=6"></script>
+  <script src="calendar-events.js?v=7"></script>
+  <script src="store.js?v=7"></script>
+  <script src="ui.js?v=7"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
 

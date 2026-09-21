@@ -1,5 +1,5 @@
-﻿const CACHE_NAME = 'growth-calendar-v6';
-const ASSETS = ['./', './index.html', './styles.css?v=6', './store.js?v=6', './ui.js?v=6', './app.js?v=6', './calendar-events.js?v=6', './manifest.webmanifest', './icon.svg'];
+﻿const CACHE_NAME = 'growth-calendar-v7';
+const ASSETS = ['./', './index.html', './styles.css?v=7', './store.js?v=7', './ui.js?v=7', './app.js?v=7', './calendar-events.js?v=7', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
