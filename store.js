@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   'use strict';
 
 
@@ -26,7 +26,6 @@
     currentView: 'calendar',
     editorDate: todayKey,
     editorImages: [],
-    timelineQuery: '',
     demoMode,
     dbAvailable: true
   };

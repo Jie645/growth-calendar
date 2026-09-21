@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const G = window.GrowthCalendar;
-  const { state, today, todayKey, WEEKDAYS, MONTH_NAMES, dateKey, parseDateKey, addDays, daysInMonth, sameMonth, formatLongDate, formatFullDate, escapeHtml, recordText, recordHasContent, contentLength, calculateStats } = G;
+  const { state, today, todayKey, MONTH_NAMES, dateKey, parseDateKey, addDays, daysInMonth, sameMonth, formatLongDate, formatFullDate, escapeHtml, recordHasContent, contentLength, calculateStats } = G;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 
@@ -11,7 +11,6 @@
     recordDialog: $('#recordDialog'), recordForm: $('#recordForm'), editorWeekday: $('#editorWeekday'), editorDate: $('#editorDate'),
     recordInput: $('#recordInput'), imageInput: $('#imageInput'),
     imagePreview: $('#imagePreview'), dropZone: $('#dropZone'), deleteRecordBtn: $('#deleteRecordBtn'),
-    timelineContent: $('#timelineContent'), timelineSearch: $('#timelineSearch'), moreDialog: $('#moreDialog'),
     welcomeDialog: $('#welcomeDialog'), imageDialog: $('#imageDialog'), lightboxImage: $('#lightboxImage'),
     importFileInput: $('#importFileInput'), demoBadge: $('#demoBadge'), toast: $('#toast'),
     weatherWidget: $('#weatherWidget'), weatherIcon: $('#weatherIcon'), weatherTemp: $('#weatherTemp'), weatherLocation: $('#weatherLocation'), weatherDesc: $('#weatherDesc')
@@ -72,38 +71,6 @@
       fragment.appendChild(button);
     }
     elements.calendarGrid.replaceChildren(fragment);
-  }
-
-  function renderTimelineCard(record) {
-    const date = parseDateKey(record.date);
-    const sections = hasText(recordText(record)) ? [['记录', recordText(record)]] : [];
-    return `<article class="timeline-card" id="record-${record.date}">
-      <div class="timeline-date"><strong>${date.getDate()}</strong><span>${WEEKDAYS[date.getDay()]}</span></div>
-      <div class="timeline-body"><div class="timeline-body-head"><h3>${formatFullDate(record.date)}</h3><div class="timeline-actions">
-      <button type="button" data-edit-date="${record.date}" aria-label="编辑记录"><svg><use href="#i-edit"></use></svg></button>
-      <button type="button" data-delete-date="${record.date}" aria-label="删除记录"><svg><use href="#i-trash"></use></svg></button></div></div>
-      <div class="timeline-sections">${sections.map(([label, value]) => `<div class="timeline-section"><b>${label}</b><p>${escapeHtml(value)}</p></div>`).join('')}</div>
-      ${record.images?.length ? `<div class="timeline-images">${record.images.map(image => `<img src="${escapeHtml(image.dataUrl)}" alt="${escapeHtml(image.name || '记录图片')}" data-lightbox="${escapeHtml(image.dataUrl)}">`).join('')}</div>` : ''}</div></article>`;
-  }
-
-  function renderTimeline() {
-    const query = state.timelineQuery.trim().toLowerCase();
-    const records = [...state.records.values()].filter(recordHasContent).filter(record => !query || recordText(record).toLowerCase().includes(query)).sort((a, b) => b.date.localeCompare(a.date));
-    if (!records.length) {
-      elements.timelineContent.innerHTML = `<div class="empty-state"><div><div class="empty-state-icon"><svg><use href="#i-timeline"></use></svg></div><h2>${query ? '没有找到匹配的记录' : '成长时间线还在等待第一条记录'}</h2><p>${query ? '试试更换关键词，或回到日历继续记录。' : '从今天开始，用一分钟写下真实片段。时间会帮你把这些片段连接起来。'}</p><button class="btn btn-primary" data-action="quick-add"><svg><use href="#i-plus"></use></svg><span>记录今天</span></button></div></div>`;
-      return;
-    }
-    const groups = new Map();
-    records.forEach(record => {
-      const date = parseDateKey(record.date);
-      const key = `${date.getFullYear()}-${G.pad(date.getMonth() + 1)}`;
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(record);
-    });
-    elements.timelineContent.innerHTML = [...groups.entries()].map(([monthKey, items]) => {
-      const [year, month] = monthKey.split('-').map(Number);
-      return `<section><h2 class="timeline-group-title">${year}年${month}月 <span class="muted">${items.length}条记录</span></h2><div class="timeline-list">${items.map(renderTimelineCard).join('')}</div></section>`;
-    }).join('');
   }
 
   function countMonth(year, month) {
@@ -168,7 +135,6 @@
   function renderAll() {
     renderHeaderStats();
     renderCalendar();
-    if (state.currentView === 'timeline') renderTimeline();
     if (state.currentView === 'insights') renderInsights();
   }
 
@@ -176,7 +142,6 @@
     state.currentView = viewName;
     elements.views.forEach(view => view.classList.toggle('active', view.id === `${viewName}View`));
     elements.navItems.forEach(item => item.classList.toggle('active', item.dataset.view === viewName));
-    if (viewName === 'timeline') renderTimeline();
     if (viewName === 'insights') renderInsights();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -189,7 +154,7 @@
   }
 
   window.GrowthCalendarUI = {
-    elements, renderAll, renderCalendar, renderTimeline, renderInsights, showView, selectDate
+    elements, renderAll, renderCalendar, renderInsights, showView, selectDate
   };
 })();
 

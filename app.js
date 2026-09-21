@@ -3,7 +3,7 @@
   const G = window.GrowthCalendar;
   const UI = window.GrowthCalendarUI;
   const Auth = window.GrowthCalendarAuth;
-  const { state, Store, todayKey, MAX_IMAGES, MAX_FILE_SIZE, WEEKDAYS, dateKey, parseDateKey, addDays, formatFullDate, escapeHtml, hasText, recordText, recordHasContent } = G;
+  const { state, Store, todayKey, MAX_IMAGES, MAX_FILE_SIZE, WEEKDAYS, dateKey, parseDateKey, addDays, formatFullDate, escapeHtml, recordText, recordHasContent } = G;
   const elements = UI.elements;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -24,6 +24,26 @@
   let authMode = 'login';
 
   function closeDialog(dialog) { if (dialog?.open) dialog.close(); }
+
+  const THEME_KEY = 'growth-calendar-theme-v1';
+
+  function applyTheme(theme, persist = true) {
+    const nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = nextTheme;
+    if (persist) {
+      try { localStorage.setItem(THEME_KEY, nextTheme); } catch {}
+    }
+    const isDark = nextTheme === 'dark';
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', isDark ? '#0a1520' : '#102a43');
+    $$('[data-theme-toggle]').forEach(button => {
+      button.setAttribute('aria-pressed', String(isDark));
+      const label = isDark ? '切换日间模式' : '切换夜间模式';
+      button.setAttribute('aria-label', label);
+      button.title = label;
+    });
+  }
+
+  function toggleTheme() { applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'); }
 
   function openEditor(key) {
     state.selectedDate = key;
@@ -413,7 +433,6 @@
     state.selectedDate = todayKey;
     state.currentMonth = new Date(G.today.getFullYear(), G.today.getMonth(), 1);
     state.currentView = 'calendar';
-    state.timelineQuery = '';
     setUserUi(user);
     authShell.classList.add('hidden');
     appShell.classList.remove('hidden');
@@ -492,6 +511,7 @@
   function bindAuthEvents() {
     $$('.auth-tabs [data-auth-mode]').forEach(button => button.addEventListener('click', () => setAuthMode(button.dataset.authMode)));
     authForm.addEventListener('submit', handleAuthSubmit);
+    $$('[data-theme-toggle]').forEach(button => button.addEventListener('click', toggleTheme));
   }
   function bindEvents() {
     document.addEventListener('click', event => {
@@ -526,16 +546,7 @@
     elements.dropZone.addEventListener('drop', event => handleImageFiles(event.dataTransfer.files));
     elements.imagePreview.addEventListener('click', event => { const button = event.target.closest('[data-remove-image]'); if (button) { state.editorImages.splice(Number(button.dataset.removeImage), 1); renderEditorImages(); } });
 
-    elements.timelineSearch.addEventListener('input', event => { state.timelineQuery = event.target.value; UI.renderTimeline(); });
     $('#randomReviewBtn').addEventListener('click', randomReview);
-    elements.timelineContent.addEventListener('click', event => {
-      const edit = event.target.closest('[data-edit-date]');
-      const remove = event.target.closest('[data-delete-date]');
-      const image = event.target.closest('[data-lightbox]');
-      if (edit) openEditor(edit.dataset.editDate);
-      if (remove) deleteRecord(remove.dataset.deleteDate);
-      if (image) openLightbox(image.dataset.lightbox);
-    });
 
     $('#moreBtn').addEventListener('click', () => elements.moreDialog.showModal());
     $('#exportDataBtn').addEventListener('click', exportData);
@@ -557,7 +568,8 @@
 
   async function init() {
     bindAuthEvents();
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=8').catch(console.warn);
+    applyTheme(document.documentElement.dataset.theme || 'light', false);
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=9').catch(console.warn);
     const user = Auth.currentUser();
     if (user) await enterApp(user);
     else showAuthScreen('login');
