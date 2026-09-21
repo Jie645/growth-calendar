@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   'use strict';
   const G = window.GrowthCalendar;
   const { state, today, todayKey, WEEKDAYS, MONTH_NAMES, dateKey, parseDateKey, addDays, daysInMonth, sameMonth, formatLongDate, formatFullDate, escapeHtml, recordText, recordHasContent, contentLength, calculateStats } = G;
@@ -37,10 +37,6 @@
       : '写下一段今天的成长片段，也为未来保留一份可回看的真实线索。';
     $('#heroStreak').textContent = stats.streak;
     $('#streakHint').textContent = stats.streak ? '保持节奏，不必追求完美' : '从今天开始';
-    $('#metricTotal').textContent = stats.total;
-    $('#metricMonth').textContent = stats.monthCount;
-    $('#metricLongest').textContent = stats.longest;
-    $('#metricPhotos').textContent = stats.photos;
   }
 
   function renderCalendar() {

@@ -8,7 +8,7 @@
   <title>成长日历 · 每天一分钟，留下成长痕迹</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <svg class="svg-sprite" aria-hidden="true">
@@ -31,7 +31,50 @@
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
   </svg>
 
-  <div class="app-shell">
+    <div id="authShell" class="auth-shell">
+    <section class="auth-panel">
+      <div class="auth-brand">
+        <span class="auth-brand-mark"><svg><use href="#i-calendar"></use></svg></span>
+        <span><strong>成长日历</strong><small>GROWTH CALENDAR</small></span>
+      </div>
+      <div class="auth-heading">
+        <span class="eyebrow">WELCOME</span>
+        <h1 id="authTitle">登录你的成长日历</h1>
+        <p id="authSubtitle">输入用户名和密码，继续记录属于你的成长片段。</p>
+      </div>
+      <div class="auth-tabs" role="tablist" aria-label="账号操作">
+        <button class="active" type="button" role="tab" data-auth-mode="login">登录</button>
+        <button type="button" role="tab" data-auth-mode="register">注册</button>
+      </div>
+      <form id="authForm" class="auth-form" novalidate>
+        <label class="auth-field">
+          <span>用户名</span>
+          <input id="authUsername" name="username" type="text" maxlength="20" autocomplete="username" placeholder="2-20位中文、字母或数字" required>
+        </label>
+        <label class="auth-field">
+          <span>密码</span>
+          <input id="authPassword" name="password" type="password" minlength="6" autocomplete="current-password" placeholder="至少6位密码" required>
+        </label>
+        <label id="authConfirmWrap" class="auth-field hidden">
+          <span>确认密码</span>
+          <input id="authConfirm" name="confirmPassword" type="password" minlength="6" autocomplete="new-password" placeholder="再次输入密码">
+        </label>
+        <p id="authMessage" class="auth-message" role="alert"></p>
+        <button id="authSubmit" class="btn btn-primary auth-submit" type="submit">登录</button>
+      </form>
+      <p class="auth-local-note"><svg><use href="#i-sparkles"></use></svg><span>账号和记录只保存在当前浏览器，不会上传服务器。</span></p>
+    </section>
+    <aside class="auth-visual" aria-hidden="true">
+      <div class="auth-orbit orbit-a"></div>
+      <div class="auth-orbit orbit-b"></div>
+      <div class="auth-visual-card">
+        <svg><use href="#i-calendar"></use></svg>
+        <strong>每一天，都值得被看见</strong>
+        <span>登录后，你的记录会按账号独立保存。</span>
+      </div>
+    </aside>
+  </div>
+  <div id="appShell" class="app-shell hidden">
     <header class="topbar">
       <button class="brand" data-view="calendar" aria-label="返回日历">
         <span class="brand-mark"><svg><use href="#i-calendar"></use></svg></span>
@@ -51,6 +94,7 @@
           <span id="weatherDesc" class="weather-desc">获取天气</span>
         </button>
         <span id="demoBadge" class="demo-badge hidden">示例模式</span>
+        <button id="logoutBtn" class="user-chip" type="button" title="退出登录"><span id="userAvatar" class="user-avatar">U</span><span id="userName" class="user-name">用户</span></button>
         <button id="quickAddBtn" class="btn btn-primary btn-compact"><svg><use href="#i-plus"></use></svg><span>记录今天</span></button>
         <button id="moreBtn" class="icon-btn" aria-label="更多设置"><svg><use href="#i-more"></use></svg></button>
       </div>
@@ -69,13 +113,6 @@
             <div><strong id="heroStreak">0</strong><span>天连续记录</span></div>
             <small id="streakHint">从今天开始</small>
           </div>
-        </div>
-
-        <div class="metric-strip">
-          <article class="metric-card"><span class="metric-label">累计记录</span><strong id="metricTotal">0</strong><small>天</small></article>
-          <article class="metric-card"><span class="metric-label">本月记录</span><strong id="metricMonth">0</strong><small>天</small></article>
-          <article class="metric-card"><span class="metric-label">最长连续</span><strong id="metricLongest">0</strong><small>天</small></article>
-          <article class="metric-card"><span class="metric-label">图片记忆</span><strong id="metricPhotos">0</strong><small>张</small></article>
         </div>
 
         <div class="calendar-layout">
@@ -197,7 +234,7 @@
       <button id="exportDataBtn" class="setting-row"><span class="setting-icon"><svg><use href="#i-download"></use></svg></span><span><strong>导出数据备份</strong><small>下载 JSON 文件，便于迁移和长期保存</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
       <button id="importDataBtn" class="setting-row"><span class="setting-icon"><svg><use href="#i-upload"></use></svg></span><span><strong>导入数据</strong><small>从成长日历 JSON 备份恢复记录</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
       <button id="loadDemoFromMoreBtn" class="setting-row"><span class="setting-icon"><svg><use href="#i-sparkles"></use></svg></span><span><strong>加载示例数据</strong><small>快速体验日历、时间线和统计效果</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
-      <button id="clearDataBtn" class="setting-row danger"><span class="setting-icon"><svg><use href="#i-trash"></use></svg></span><span><strong>清空全部数据</strong><small>此操作不可撤销，请先导出备份</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
+      <button id="clearDataBtn" class="setting-row danger"><span class="setting-icon"><svg><use href="#i-trash"></use></svg></span><span><strong>清空当前账号数据</strong><small>此操作不可撤销，请先导出备份</small></span><svg class="setting-arrow"><use href="#i-chevron-right"></use></svg></button>
       <input id="importFileInput" type="file" accept="application/json,.json" hidden>
     </div>
   </dialog>
@@ -205,10 +242,11 @@
   <dialog id="imageDialog" class="dialog image-dialog"><button type="button" class="icon-btn image-dialog-close" data-close-dialog="imageDialog" aria-label="关闭"><svg><use href="#i-close"></use></svg></button><img id="lightboxImage" alt="记录图片"></dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="calendar-events.js?v=7"></script>
-  <script src="store.js?v=7"></script>
-  <script src="ui.js?v=7"></script>
-  <script src="app.js?v=7"></script>
+  <script src="calendar-events.js?v=8"></script>
+  <script src="store.js?v=8"></script>
+  <script src="auth.js?v=8"></script>
+  <script src="ui.js?v=8"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>
 

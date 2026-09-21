@@ -2,10 +2,26 @@
   'use strict';
   const G = window.GrowthCalendar;
   const UI = window.GrowthCalendarUI;
+  const Auth = window.GrowthCalendarAuth;
   const { state, Store, todayKey, MAX_IMAGES, MAX_FILE_SIZE, WEEKDAYS, dateKey, parseDateKey, addDays, formatFullDate, escapeHtml, hasText, recordText, recordHasContent } = G;
   const elements = UI.elements;
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+  const appShell = $('#appShell');
+  const authShell = $('#authShell');
+  const authForm = $('#authForm');
+  const authUsername = $('#authUsername');
+  const authPassword = $('#authPassword');
+  const authConfirm = $('#authConfirm');
+  const authConfirmWrap = $('#authConfirmWrap');
+  const authMessage = $('#authMessage');
+  const authSubmit = $('#authSubmit');
+  const authTitle = $('#authTitle');
+  const authSubtitle = $('#authSubtitle');
+  const userName = $('#userName');
+  const userAvatar = $('#userAvatar');
+  let appStarted = false;
+  let authMode = 'login';
 
   function closeDialog(dialog) { if (dialog?.open) dialog.close(); }
 
@@ -94,6 +110,7 @@
     const existing = state.records.get(date);
     const record = {
       date,
+      owner: state.user.id,
       text: elements.recordInput.value.trim(),
       images: state.editorImages,
       createdAt: existing?.createdAt || new Date().toISOString(),
@@ -114,7 +131,7 @@
 
   async function deleteRecord(key, ask = true) {
     if (ask && !window.confirm(`确定删除 ${formatFullDate(key)} 的记录吗？此操作不可撤销。`)) return;
-    if (!state.demoMode) await Store.remove(key);
+    if (!state.demoMode) await Store.remove(key, state.user.id);
     state.records.delete(key);
     closeDialog(elements.recordDialog);
     UI.renderAll();
@@ -285,7 +302,7 @@
   }
 
   async function loadDemoData() {
-    const records = generateDemoRecords();
+    const records = generateDemoRecords().map(record => ({ ...record, owner: state.user.id }));
     if (!state.demoMode) await Store.putMany(records);
     records.forEach(record => state.records.set(record.date, record));
     closeDialog(elements.welcomeDialog);
@@ -316,7 +333,7 @@
       const source = Array.isArray(payload) ? payload : payload.records;
       if (!Array.isArray(source)) throw new Error('invalid records');
       const records = source.filter(record => record && /^\d{4}-\d{2}-\d{2}$/.test(record.date)).map(record => ({
-        date: record.date, text: recordText(record),
+        date: record.date, owner: state.user.id, text: recordText(record),
         images: Array.isArray(record.images) ? record.images : [], createdAt: record.createdAt || new Date().toISOString(), updatedAt: record.updatedAt || new Date().toISOString()
       })).filter(recordHasContent);
       if (!records.length) throw new Error('empty records');
@@ -334,8 +351,8 @@
   }
 
   async function clearAllData() {
-    if (!window.confirm('确定清空全部记录吗？此操作不可撤销，建议先导出备份。')) return;
-    if (!state.demoMode) await Store.clear();
+    if (!window.confirm('确定清空当前账号的全部记录吗？此操作不可撤销，建议先导出备份。')) return;
+    if (!state.demoMode) await Store.clear(state.user.id);
     state.records.clear();
     closeDialog(elements.moreDialog);
     UI.renderAll();
@@ -356,6 +373,126 @@
     toast(`一起回顾 ${formatFullDate(record.date)}`);
   }
 
+  function setAuthMessage(message = '', type = '') {
+    authMessage.textContent = message;
+    authMessage.className = `auth-message ${type === 'success' ? 'success' : ''}`.trim();
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode === 'register' ? 'register' : 'login';
+    const registering = authMode === 'register';
+    $$('.auth-tabs [data-auth-mode]').forEach(button => button.classList.toggle('active', button.dataset.authMode === authMode));
+    authConfirmWrap.classList.toggle('hidden', !registering);
+    authConfirm.required = registering;
+    authPassword.autocomplete = registering ? 'new-password' : 'current-password';
+    authTitle.textContent = registering ? '创建你的成长账号' : '登录你的成长日历';
+    authSubtitle.textContent = registering ? '设置用户名和密码，开始记录属于你的成长片段。' : '输入用户名和密码，继续记录属于你的成长片段。';
+    authSubmit.textContent = registering ? '注册并进入' : '登录';
+    setAuthMessage();
+  }
+
+  function setUserUi(user) {
+    userName.textContent = user.username;
+    userAvatar.textContent = [...user.username][0]?.toUpperCase() || 'U';
+  }
+
+  async function loadAccountRecords() {
+    state.records.clear();
+    if (state.demoMode) {
+      generateDemoRecords().forEach(record => state.records.set(record.date, record));
+      elements.demoBadge.classList.remove('hidden');
+      return;
+    }
+    elements.demoBadge.classList.add('hidden');
+    const records = await Store.all(state.user.id);
+    records.filter(recordHasContent).forEach(record => state.records.set(record.date, record));
+  }
+
+  async function enterApp(user) {
+    state.user = user;
+    state.selectedDate = todayKey;
+    state.currentMonth = new Date(G.today.getFullYear(), G.today.getMonth(), 1);
+    state.currentView = 'calendar';
+    state.timelineQuery = '';
+    setUserUi(user);
+    authShell.classList.add('hidden');
+    appShell.classList.remove('hidden');
+    if (!appStarted) {
+      bindEvents();
+      appStarted = true;
+    }
+    await loadAccountRecords();
+    UI.renderAll();
+    UI.showView('calendar');
+    loadWeather();
+    const editParam = new URLSearchParams(location.search).get('edit');
+    if (editParam) openEditor(editParam === 'today' ? todayKey : editParam);
+    if (!state.records.size && !state.demoMode) setTimeout(() => { if (state.user?.id === user.id && !appShell.classList.contains('hidden')) elements.welcomeDialog.showModal(); }, 180);
+  }
+
+  function showAuthScreen(mode = 'login') {
+    appShell.classList.add('hidden');
+    authShell.classList.remove('hidden');
+    authPassword.value = '';
+    authConfirm.value = '';
+    setAuthMode(mode);
+    setTimeout(() => authUsername.focus(), 60);
+  }
+
+  function logout() {
+    if (!window.confirm('退出当前账号吗？记录仍会保存在当前浏览器中。')) return;
+    Auth.logout();
+    state.user = null;
+    state.records.clear();
+    closeDialog(elements.recordDialog);
+    closeDialog(elements.moreDialog);
+    closeDialog(elements.welcomeDialog);
+    closeDialog(elements.imageDialog);
+    authForm.reset();
+    showAuthScreen('login');
+  }
+
+  async function handleAuthSubmit(event) {
+    event.preventDefault();
+    const username = authUsername.value.trim();
+    const password = authPassword.value;
+    if (authMode === 'register' && password !== authConfirm.value) {
+      return setAuthMessage('两次输入的密码不一致');
+    }
+    const submitLabel = authMode === 'register' ? '注册并进入' : '登录';
+    authSubmit.disabled = true;
+    authSubmit.textContent = '处理中…';
+    try {
+      let user;
+      if (authMode === 'register') {
+        user = await Auth.register(username, password);
+        if (user.isFirstAccount) {
+          const migrated = await Store.claimLegacyRecords(user.id);
+          if (migrated) setAuthMessage(`已为当前账号导入 ${migrated} 条原有记录`, 'success');
+        }
+      } else {
+        user = await Auth.login(username, password);
+      }
+      await enterApp(user);
+    } catch (error) {
+      console.error(error);
+      const messages = {
+        INVALID_USERNAME: '用户名需为2-20位中文、字母、数字、下划线或短横线',
+        WEAK_PASSWORD: '密码至少需要6位',
+        ACCOUNT_EXISTS: '这个用户名已经注册，请直接登录',
+        INVALID_CREDENTIALS: '用户名或密码错误'
+      };
+      setAuthMessage(messages[error.message] || '操作失败，请稍后重试');
+    } finally {
+      authSubmit.disabled = false;
+      authSubmit.textContent = submitLabel;
+    }
+  }
+
+  function bindAuthEvents() {
+    $$('.auth-tabs [data-auth-mode]').forEach(button => button.addEventListener('click', () => setAuthMode(button.dataset.authMode)));
+    authForm.addEventListener('submit', handleAuthSubmit);
+  }
   function bindEvents() {
     document.addEventListener('click', event => {
       const viewButton = event.target.closest('[data-view]');
@@ -366,6 +503,7 @@
     });
 
     $('#quickAddBtn').addEventListener('click', () => openEditor(todayKey));
+    $('#logoutBtn').addEventListener('click', logout);
     elements.weatherWidget.addEventListener('click', () => loadWeather(true));
     $('#prevMonthBtn').addEventListener('click', () => { state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth() - 1, 1); UI.renderCalendar(); });
     $('#nextMonthBtn').addEventListener('click', () => { state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth() + 1, 1); UI.renderCalendar(); });
@@ -418,25 +556,13 @@
   }
 
   async function init() {
-    bindEvents();
-    if (state.demoMode) {
-      generateDemoRecords().forEach(record => state.records.set(record.date, record));
-      elements.demoBadge.classList.remove('hidden');
-    } else {
-      const records = await Store.all();
-      records.filter(recordHasContent).forEach(record => state.records.set(record.date, record));
-    }
-    UI.renderAll();
-    loadWeather();
-    const initialView = new URLSearchParams(location.search).get('view');
-    if (['calendar', 'timeline', 'insights'].includes(initialView)) UI.showView(initialView);
-    const editParam = new URLSearchParams(location.search).get('edit');
-    if (editParam) openEditor(editParam === 'today' ? todayKey : editParam);
-    if (!state.records.size && !state.demoMode) setTimeout(() => elements.welcomeDialog.showModal(), 180);
-    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=7').catch(console.warn);
+    bindAuthEvents();
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js?v=8').catch(console.warn);
+    const user = Auth.currentUser();
+    if (user) await enterApp(user);
+    else showAuthScreen('login');
   }
-
-  init().catch(error => { console.error(error); toast('应用初始化失败，请刷新页面重试', 'error'); });
+  init().catch(error => { console.error(error); showAuthScreen('login'); setAuthMessage('应用初始化失败，请刷新页面重试'); });
 })();
 
 
